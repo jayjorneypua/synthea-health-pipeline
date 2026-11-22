@@ -23,7 +23,7 @@ with DAG(
         task_id="generate_synthea",
         bash_command=(
             "cd " + PROJECT + " && rm -rf data/synthea/csv && "
-            "java -jar synthea/synthea-with-dependencies.jar -s 42 -p 100 "
+            "java -jar synthea/synthea-with-dependencies.jar -s 42 -r 20261122 -p 100 "
             "--exporter.baseDirectory ./data/synthea/ --exporter.csv.export true --exporter.fhir.export false"
         ),
     )
