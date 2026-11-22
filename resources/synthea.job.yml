@@ -13,3 +13,15 @@ resources:
         - task_key: bronze_cdc
           notebook_task:
             notebook_path: ../notebooks/01_bronze_cdc.py
+            
+        - task_key: silver_cdc
+          depends_on:
+            - task_key: bronze_cdc
+          notebook_task:
+            notebook_path: ../notebooks/02_silver_cdc.py
+            
+        - task_key: silver_patient_history
+          depends_on:
+            - task_key: bronze_cdc
+          notebook_task:
+            notebook_path: ../notebooks/03_silver_patient_history.py
