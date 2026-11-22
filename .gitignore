@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.databricks/
+data/
+synthea/*.jar
+airflow/logs/
+*.csv
+*.parquet
