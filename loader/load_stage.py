@@ -6,6 +6,7 @@ driver's license) are skipped. The merge procs then move stage rows into the rea
 """
 import argparse
 import csv
+import os
 import sys
 import time
 from pathlib import Path
@@ -38,10 +39,16 @@ def pick_driver() -> str:
 
 
 def connect(server: str, database: str) -> pyodbc.Connection:
+    """synthea_loader SQL login when SYNTHEA_LOADER_PWD is set (least privilege, works in Docker),
+    otherwise Windows authentication."""
     driver: str = pick_driver()
+    password: Optional[str] = os.environ.get("SYNTHEA_LOADER_PWD")
+    auth: str = "Trusted_Connection=yes;"
+    if password is not None and password != "":
+        auth = "UID=synthea_loader;PWD={" + password + "};"
     conn_str: str = (
         "Driver={" + driver + "};Server=" + server + ";Database=" + database + ";"
-        "Trusted_Connection=yes;Encrypt=yes;TrustServerCertificate=yes;"
+        + auth + "Encrypt=yes;TrustServerCertificate=yes;"
     )
     return pyodbc.connect(conn_str, autocommit=False)
 
@@ -125,7 +132,7 @@ def load_file(conn: pyodbc.Connection, csv_path: Path, table: str) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Load Synthea CSV files into stage tables.")
     parser.add_argument("--csv-dir", default="data/synthea/csv")
-    parser.add_argument("--server", default=".")
+    parser.add_argument("--server", default=os.environ.get("SYNTHEA_SQL_SERVER", "."))
     parser.add_argument("--database", default="SyntheaHealth")
     args = parser.parse_args()
 

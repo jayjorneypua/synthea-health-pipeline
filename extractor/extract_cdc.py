@@ -206,7 +206,11 @@ def main() -> int:
     args: argparse.Namespace = parser.parse_args()
 
     pyodbc.native_uuid = False  # UNIQUEIDENTIFIER as string in Parquet
-    client: WorkspaceClient = WorkspaceClient(profile=args.profile)
+    client: WorkspaceClient
+    if os.environ.get("DATABRICKS_TOKEN") is not None:
+        client = WorkspaceClient()  # DATABRICKS_HOST + DATABRICKS_TOKEN from env (Docker)
+    else:
+        client = WorkspaceClient(profile=args.profile)
     conn: pyodbc.Connection = connect(args.server, args.database)
 
     try:
