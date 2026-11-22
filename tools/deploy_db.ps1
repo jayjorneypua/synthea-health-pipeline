@@ -19,6 +19,15 @@ if ($LASTEXITCODE -ne 0) { throw "create database failed" }
 , "db\tables\security.User.sql"
 , "db\tables\ref.Location.sql"
 , "db\procs\ref.spLocation_UpdateHierarchy.sql"
+, "db\tables\ref.Code.sql"
+, "db\tables\ref.Payer.sql"
+, "db\tables\ref.Organization.sql"
+, "db\tables\ref.Provider.sql"
+, "db\tables\clinical.Patient.sql"
+, "db\tables\clinical.Encounter.sql"
+, "db\tables\clinical.Condition.sql"
+, "db\tables\clinical.Medication.sql"
+, "db\tables\clinical.Procedure.sql"
 )
 
 foreach ($File in $Files) {
