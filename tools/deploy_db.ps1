@@ -62,6 +62,18 @@ if ($LASTEXITCODE -ne 0) { throw "create database failed" }
 , "db\security\login_Extractor.sql"
 , "db\security\login_Developer.sql"
 , "db\security\login_Clinician.sql"
+, "db\cdc\cdc.EnableDatabase.sql"
+, "db\cdc\cdc.ref_Location.sql"
+, "db\cdc\cdc.ref_Code.sql"
+, "db\cdc\cdc.ref_Payer.sql"
+, "db\cdc\cdc.ref_Organization.sql"
+, "db\cdc\cdc.ref_Provider.sql"
+, "db\cdc\cdc.clinical_Patient.sql"
+, "db\cdc\cdc.clinical_Encounter.sql"
+, "db\cdc\cdc.clinical_Condition.sql"
+, "db\cdc\cdc.clinical_Medication.sql"
+, "db\cdc\cdc.clinical_Procedure.sql"
+, "db\cdc\cdc.Jobs.sql"
 )
 
 foreach ($File in $Files) {
