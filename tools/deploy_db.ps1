@@ -28,6 +28,21 @@ if ($LASTEXITCODE -ne 0) { throw "create database failed" }
 , "db\tables\clinical.Condition.sql"
 , "db\tables\clinical.Medication.sql"
 , "db\tables\clinical.Procedure.sql"
+, "db\tables\stage.Tables.sql"
+, "db\tables\ref.UsState.sql"
+, "db\procs\ref.spLocation_RebuildHierarchy.sql"
+, "db\procs\stage.spMerge_Location.sql"
+, "db\procs\stage.spMerge_Code.sql"
+, "db\views\stage.vwCityLookup.sql"
+, "db\procs\stage.spMerge_Payer.sql"
+, "db\procs\stage.spMerge_Organization.sql"
+, "db\procs\stage.spMerge_Provider.sql"
+, "db\procs\stage.spMerge_Patient.sql"
+, "db\procs\stage.spMerge_Encounter.sql"
+, "db\procs\stage.spMerge_Condition.sql"
+, "db\procs\stage.spMerge_Medication.sql"
+, "db\procs\stage.spMerge_Procedure.sql"
+, "db\procs\stage.spLoad_All.sql"
 )
 
 foreach ($File in $Files) {
