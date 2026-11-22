@@ -1,0 +1,28 @@
+# lean local Airflow: one container (airflow standalone, SQLite metadata). manual trigger only.
+# secrets come from your user env vars (SYNTHEA_*), never from this file.
+name: synthea-airflow
+
+services:
+  airflow:
+    build:
+      context: ..
+      dockerfile: airflow/Dockerfile
+    image: synthea-airflow:local
+    command: standalone
+    ports:
+      - "127.0.0.1:8081:8080"
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_FOLDER: /opt/project/airflow/dags
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+      SYNTHEA_SQL_SERVER: "host.docker.internal,1433"
+      SYNTHEA_LOADER_PWD: ${SYNTHEA_LOADER_PWD}
+      SYNTHEA_EXTRACTOR_PWD: ${SYNTHEA_EXTRACTOR_PWD}
+      DATABRICKS_HOST: https://dbc-609647e1-c073.cloud.databricks.com
+      DATABRICKS_TOKEN: ${SYNTHEA_DATABRICKS_TOKEN}
+    volumes:
+      - ..:/opt/project
+      - airflow-home:/opt/airflow
+
+volumes:
+  airflow-home:
