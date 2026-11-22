@@ -1,0 +1,15 @@
+resources:
+  jobs:
+    synthea_health_pipeline:
+      name: synthea_health_pipeline
+      max_concurrent_runs: 1
+      # no schedule: Airflow triggers it after the extractor uploads
+
+      email_notifications:
+        on_failure:
+          - jayjorneypua@gmail.com
+
+      tasks:
+        - task_key: bronze_cdc
+          notebook_task:
+            notebook_path: ../notebooks/01_bronze_cdc.py

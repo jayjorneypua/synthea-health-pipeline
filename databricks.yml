@@ -8,6 +8,16 @@ workspace:
 
 include:
   - resources/*.yml
+  
+sync:
+  exclude:
+    - db/**
+    - loader/**
+    - extractor/**
+    - tools/**
+    - tests/**
+    - data/**
+    - synthea/**
 
 targets:
   prod:
