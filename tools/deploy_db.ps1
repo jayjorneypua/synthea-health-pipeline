@@ -43,6 +43,17 @@ if ($LASTEXITCODE -ne 0) { throw "create database failed" }
 , "db\procs\stage.spMerge_Medication.sql"
 , "db\procs\stage.spMerge_Procedure.sql"
 , "db\procs\stage.spLoad_All.sql"
+, "db\views\api.vwLocation.sql"
+, "db\views\api.vwCode.sql"
+, "db\views\api.vwUsState.sql"
+, "db\views\api.vwPayer.sql"
+, "db\views\api.vwOrganization.sql"
+, "db\views\api.vwProvider.sql"
+, "db\views\api.vwPatient.sql"
+, "db\views\api.vwEncounter.sql"
+, "db\views\api.vwCondition.sql"
+, "db\views\api.vwMedication.sql"
+, "db\views\api.vwProcedure.sql"
 )
 
 foreach ($File in $Files) {
