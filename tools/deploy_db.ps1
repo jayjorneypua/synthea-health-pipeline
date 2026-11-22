@@ -74,6 +74,7 @@ if ($LASTEXITCODE -ne 0) { throw "create database failed" }
 , "db\cdc\cdc.clinical_Medication.sql"
 , "db\cdc\cdc.clinical_Procedure.sql"
 , "db\cdc\cdc.Jobs.sql"
+, "db\procs\stage.spSimulate_Changes.sql"
 )
 
 foreach ($File in $Files) {
