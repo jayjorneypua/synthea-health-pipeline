@@ -1,0 +1,98 @@
+version: 2
+
+models:
+  - name: dim_location
+    columns:
+      - name: location_id
+        data_tests: [unique, not_null]
+
+  - name: dim_patient
+    columns:
+      - name: patient_version_key
+        data_tests: [unique, not_null]
+      - name: patient_id
+        data_tests: [not_null]
+
+  - name: dim_code
+    columns:
+      - name: code_id
+        data_tests: [unique, not_null]
+
+  - name: dim_organization
+    columns:
+      - name: organization_id
+        data_tests: [unique, not_null]
+
+  - name: dim_provider
+    columns:
+      - name: provider_id
+        data_tests: [unique, not_null]
+
+  - name: dim_payer
+    columns:
+      - name: payer_id
+        data_tests: [unique, not_null]
+
+  - name: dim_date
+    columns:
+      - name: date_key
+        data_tests: [unique, not_null]
+
+  - name: fct_encounters
+    columns:
+      - name: encounter_id
+        data_tests: [unique, not_null]
+      - name: patient_version_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_patient')
+                field: patient_version_key
+      - name: location_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_location')
+                field: location_id
+      - name: organization_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_organization')
+                field: organization_id
+      - name: payer_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_payer')
+                field: payer_id
+      - name: reason_code_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_code')
+                field: code_id
+      - name: start_date_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+
+  - name: fct_conditions
+    columns:
+      - name: condition_id
+        data_tests: [unique, not_null]
+      - name: encounter_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('fct_encounters')
+                field: encounter_id
+      - name: code_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_code')
+                field: code_id

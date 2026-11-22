@@ -8,3 +8,6 @@ synthea/*.jar
 airflow/logs/
 *.csv
 *.parquetdata/extract/
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/

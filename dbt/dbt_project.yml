@@ -1,0 +1,15 @@
+name: synthea_health
+
+profile: synthea_health
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  synthea_health:
+    marts:
+      +materialized: table

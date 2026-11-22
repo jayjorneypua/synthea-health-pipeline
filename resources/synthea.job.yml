@@ -9,19 +9,40 @@ resources:
         on_failure:
           - jayjorneypua@gmail.com
 
+      environments:
+        - environment_key: dbt-default
+          spec:
+            environment_version: "6"
+            dependencies:
+              - dbt-databricks==1.13.0
+
       tasks:
         - task_key: bronze_cdc
           notebook_task:
             notebook_path: ../notebooks/01_bronze_cdc.py
-            
+
         - task_key: silver_cdc
           depends_on:
             - task_key: bronze_cdc
           notebook_task:
             notebook_path: ../notebooks/02_silver_cdc.py
-            
+
         - task_key: silver_patient_history
           depends_on:
             - task_key: bronze_cdc
           notebook_task:
             notebook_path: ../notebooks/03_silver_patient_history.py
+
+        - task_key: dbt_build
+          depends_on:
+            - task_key: silver_cdc
+            - task_key: silver_patient_history
+          environment_key: dbt-default
+          dbt_task:
+            project_directory: ../dbt
+            commands:
+              - dbt deps
+              - dbt build
+            warehouse_id: 606b0c60dc21c8fd
+            catalog: synthea
+            schema: gold

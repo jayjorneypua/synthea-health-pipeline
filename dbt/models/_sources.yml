@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: silver
+    database: synthea
+    schema: silver
+    tables:
+      - name: ref_location
+      - name: ref_code
+      - name: ref_payer
+      - name: ref_organization
+      - name: ref_provider
+      - name: clinical_patient_history
+      - name: clinical_encounter
+      - name: clinical_condition
