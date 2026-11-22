@@ -54,6 +54,14 @@ if ($LASTEXITCODE -ne 0) { throw "create database failed" }
 , "db\views\api.vwCondition.sql"
 , "db\views\api.vwMedication.sql"
 , "db\views\api.vwProcedure.sql"
+, "db\security\role_Developer.sql"
+, "db\security\role_Clinician.sql"
+, "db\security\role_Loader.sql"
+, "db\security\role_Extractor.sql"
+, "db\security\login_Loader.sql"
+, "db\security\login_Extractor.sql"
+, "db\security\login_Developer.sql"
+, "db\security\login_Clinician.sql"
 )
 
 foreach ($File in $Files) {
