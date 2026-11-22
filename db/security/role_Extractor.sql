@@ -12,6 +12,7 @@ GO
 
 GRANT SELECT ON SCHEMA::ref TO role_Extractor;
 GRANT SELECT ON SCHEMA::clinical TO role_Extractor;
+GRANT SELECT, INSERT, UPDATE ON SCHEMA::etl TO role_Extractor;
 GO
 
 PRINT N'role_Extractor - Script Done';

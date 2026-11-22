@@ -1,0 +1,27 @@
+# landing holds the cdc volume (Parquet from the extractor). bronze/silver/gold hold the tables.
+resources:
+  schemas:
+    landing:
+      catalog_name: synthea
+      name: landing
+      comment: Raw Parquet files from the CDC extractor
+    bronze:
+      catalog_name: synthea
+      name: bronze
+      comment: Auto Loader tables, one per capture instance
+    silver:
+      catalog_name: synthea
+      name: silver
+      comment: CDC applied, deduped, SCD2 patients
+    gold:
+      catalog_name: synthea
+      name: gold
+      comment: dbt marts for Power BI
+
+  volumes:
+    cdc:
+      catalog_name: synthea
+      schema_name: ${resources.schemas.landing.name}
+      name: cdc
+      volume_type: MANAGED
+      comment: CDC Parquet files, one folder per capture instance
