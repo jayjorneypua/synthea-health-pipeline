@@ -16,7 +16,7 @@ flowchart LR
             MERGE["stage.spLoad_All<br/>merge changed rows only"]
             CORE["ref + clinical tables"]
             SIM["stage.spSimulate_Changes<br/>inserts, updates, deletes"]
-            CDC["CDC change tables<br/>10 tables, 30-day retention"]
+            CDC["CDC change tables<br/>12 tables, 30-day retention"]
             WM["etl.CdcWatermark<br/>last LSN read"]
         end
         EXT["extractor/extract_cdc.py<br/>snapshot + net changes"]
@@ -71,7 +71,7 @@ The Databricks part is a bundle-deployed job:
 - Role-based security: four roles (Developer, Clinician, Loader, Extractor) built on schema grants, each with its own least-privilege login. Dynamic data masking hides patient details, and the extractor can unmask `BirthDate` only, because silver needs it.
 - Data minimization: SSN, driver's license and passport numbers are never loaded. There is no stage column for them.
 - Merges write only rows that actually changed (`EXISTS ... EXCEPT`), so CDC never logs fake updates.
-- CDC is enabled on 10 tables with 30-day retention. The extractor tracks the last LSN it read in `etl.CdcWatermark`, so each run only pulls new changes.
+- CDC is enabled on 12 tables with 30-day retention. The extractor tracks the last LSN it read in `etl.CdcWatermark`, so each run only pulls new changes.
 - `stage.spSimulate_Changes` makes random inserts, updates and deletes so every run has real CDC traffic to process.
 - No secrets in the repo: passwords and the Databricks token live in user environment variables.
 
@@ -82,17 +82,27 @@ The Databricks part is a bundle-deployed job:
 | `landing` | `cdc` volume with Parquet from the extractor, one folder per capture instance |
 | `bronze` | Auto Loader tables, one per capture instance |
 | `silver` | CDC applied and deduped, plus SCD2 patient history |
-| `gold` | dbt marts: 7 dimensions (code, date, location, organization, patient, payer, provider) and 2 facts (encounters, conditions) |
+| `gold` | dbt marts: 7 dimensions (code, date, location, organization, patient, payer, provider) and 4 facts (encounters, conditions, claims, claim lines) |
 
 dbt tests cover keys and relationships, plus a custom test that each patient has exactly one current version in the SCD2 dimension.
 
 ## Dashboard
 
-Star model with 9 relationships. Cards for encounters, patients, total claim cost and 30-day readmission rate, encounters by year, top 10 conditions by claim cost, encounters by location (state, county, city drill-down) and an encounter class slicer.
+Two pages on one star model.
 
-Last full run: 1,000 Synthea patients, about 66K encounters, 838K rows written in Databricks, 7m 49s end to end.
+**Encounters:** cards for encounters, patients, total claim cost and 30-day readmission rate, encounters by year, top 10 conditions by claim cost, encounters by location (state, county, city drill-down) and an encounter class slicer.
 
-Note on the encounters-by-year chart: the jump after 2016 is Synthea, not the pipeline. Synthea only exports about the last 10 years of detailed history by default, and the run uses a reference date of 2026-11-22.
+**Claims:** cards for claims, total charges, total payments and outstanding balance, charges vs payments by year, top 10 providers by charges, payments by method and a claim status slicer.
+
+![Claims page](docs/images/dashboard_claims.png)
+
+Last full run: 1,000 Synthea patients, about 66K encounters, 116K claims and 1.24M claim transactions.
+
+Notes on the data:
+- The jump after 2016 in the yearly charts is Synthea, not the pipeline. Synthea only exports about the last 10 years of detailed history by default, and the run uses a reference date of 2026-11-22.
+- Synthea stores each claim transaction's value in a different column per type (charges in `AMOUNT`, payments in `PAYMENTS`, transfers in `TRANSFERS`). `fct_claim_lines.line_amount` picks the right one, so totals reconcile: charges and payments both come to 175.24M.
+- Claims keep their history when the simulator soft-deletes an encounter (billing already happened). They are flagged with `is_encounter_deleted`, and the claim-to-encounter dbt test skips them.
+- All outstanding balance sits in claims with status BILLED. Outstanding adds the primary, secondary and patient balances, so a balance moved between payers can appear in more than one bucket.
 
 ## Running it
 
