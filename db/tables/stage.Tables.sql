@@ -232,5 +232,73 @@ CREATE TABLE stage.[Procedure] (
 );
 GO
 
+------------------------------------------------------------------------------------
+-- stage.Claim
+------------------------------------------------------------------------------------
+IF OBJECT_ID(N'stage.Claim', N'U') IS NOT NULL BEGIN
+    PRINT N'stage.Claim - Dropping';
+    DROP TABLE stage.Claim;
+END
+GO
+
+PRINT N'stage.Claim - Creating';
+CREATE TABLE stage.Claim (
+      StageID                    INT                 NOT NULL     IDENTITY(1, 1)
+    , [Id]                       NVARCHAR(100)       NULL
+    , [PATIENTID]                NVARCHAR(100)       NULL
+    , [PROVIDERID]               NVARCHAR(100)       NULL
+    , [DIAGNOSIS1]               NVARCHAR(50)        NULL
+    , [APPOINTMENTID]            NVARCHAR(100)       NULL
+    , [CURRENTILLNESSDATE]       NVARCHAR(50)        NULL
+    , [SERVICEDATE]              NVARCHAR(50)        NULL
+    , [STATUS1]                  NVARCHAR(50)        NULL
+    , [STATUS2]                  NVARCHAR(50)        NULL
+    , [STATUSP]                  NVARCHAR(50)        NULL
+    , [OUTSTANDING1]             NVARCHAR(50)        NULL
+    , [OUTSTANDING2]             NVARCHAR(50)        NULL
+    , [OUTSTANDINGP]             NVARCHAR(50)        NULL
+    , [LASTBILLEDDATE1]          NVARCHAR(50)        NULL
+    , [LASTBILLEDDATE2]          NVARCHAR(50)        NULL
+    , [LASTBILLEDDATEP]          NVARCHAR(50)        NULL
+    , [HEALTHCARECLAIMTYPEID1]   NVARCHAR(20)        NULL
+    , [HEALTHCARECLAIMTYPEID2]   NVARCHAR(20)        NULL
+    , CONSTRAINT pk_stage_claim_StageID PRIMARY KEY CLUSTERED (StageID)
+);
+GO
+
+------------------------------------------------------------------------------------
+-- stage.ClaimLine
+------------------------------------------------------------------------------------
+IF OBJECT_ID(N'stage.ClaimLine', N'U') IS NOT NULL BEGIN
+    PRINT N'stage.ClaimLine - Dropping';
+    DROP TABLE stage.ClaimLine;
+END
+GO
+
+PRINT N'stage.ClaimLine - Creating';
+CREATE TABLE stage.ClaimLine (
+      StageID                 INT                 NOT NULL     IDENTITY(1, 1)
+    , [ID]                    NVARCHAR(100)       NULL
+    , [CLAIMID]               NVARCHAR(100)       NULL
+    , [CHARGEID]              NVARCHAR(20)        NULL
+    , [TYPE]                  NVARCHAR(50)        NULL
+    , [AMOUNT]                NVARCHAR(50)        NULL
+    , [METHOD]                NVARCHAR(50)        NULL
+    , [FROMDATE]              NVARCHAR(50)        NULL
+    , [TODATE]                NVARCHAR(50)        NULL
+    , [PLACEOFSERVICE]        NVARCHAR(100)       NULL
+    , [PROCEDURECODE]         NVARCHAR(50)        NULL
+    , [UNITS]                 NVARCHAR(50)        NULL
+    , [UNITAMOUNT]            NVARCHAR(50)        NULL
+    , [TRANSFERTYPE]          NVARCHAR(20)        NULL
+    , [PAYMENTS]              NVARCHAR(50)        NULL
+    , [ADJUSTMENTS]           NVARCHAR(50)        NULL
+    , [TRANSFERS]             NVARCHAR(50)        NULL
+    , [OUTSTANDING]           NVARCHAR(50)        NULL
+    , [PROVIDERID]            NVARCHAR(100)       NULL
+    , CONSTRAINT pk_stage_claimline_StageID PRIMARY KEY CLUSTERED (StageID)
+);
+GO
+
 PRINT N'Stage Tables - Script Done';
 GO

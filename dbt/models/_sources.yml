@@ -13,3 +13,5 @@ sources:
       - name: clinical_patient_history
       - name: clinical_encounter
       - name: clinical_condition
+      - name: clinical_claim
+      - name: clinical_claimline

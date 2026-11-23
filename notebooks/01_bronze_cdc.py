@@ -12,6 +12,7 @@ checkpoint_root: str = landing_root + "/_checkpoints"
 instances: List[str] = [
     "ref_Location", "ref_Code", "ref_Payer", "ref_Organization", "ref_Provider",
     "clinical_Patient", "clinical_Encounter", "clinical_Condition", "clinical_Medication", "clinical_Procedure",
+    "clinical_Claim", "clinical_ClaimLine",
 ]
 
 for instance in instances:

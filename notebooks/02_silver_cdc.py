@@ -14,6 +14,7 @@ checkpoint_root: str = "/Volumes/synthea/landing/cdc/_checkpoints"
 instances: List[str] = [
     "ref_Location", "ref_Code", "ref_Payer", "ref_Organization", "ref_Provider",
     "clinical_Patient", "clinical_Encounter", "clinical_Condition", "clinical_Medication", "clinical_Procedure",
+    "clinical_Claim", "clinical_ClaimLine",
 ]
 metadata_columns: List[str] = ["_op", "_lsn", "_extracted_at", "_source_file", "_ingested_at", "_rescued_data"]
 

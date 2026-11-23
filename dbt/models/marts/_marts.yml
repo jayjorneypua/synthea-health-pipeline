@@ -96,3 +96,73 @@ models:
               arguments:
                 to: ref('dim_code')
                 field: code_id
+  - name: fct_claims
+    columns:
+      - name: claim_id
+        data_tests: [unique, not_null]
+      - name: encounter_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('fct_encounters')
+                field: encounter_id
+      - name: patient_version_key
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_patient')
+                field: patient_version_key
+      - name: provider_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_provider')
+                field: provider_id
+      - name: diagnosis_code_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_code')
+                field: code_id
+      - name: service_date_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+
+  - name: fct_claim_lines
+    columns:
+      - name: claim_line_id
+        data_tests: [unique, not_null]
+      - name: claim_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('fct_claims')
+                field: claim_id
+      - name: provider_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_provider')
+                field: provider_id
+      - name: organization_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_organization')
+                field: organization_id
+      - name: procedure_code_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_code')
+                field: code_id
+      - name: from_date_key
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
