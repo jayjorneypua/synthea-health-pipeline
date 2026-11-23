@@ -24,8 +24,9 @@ FILE_TO_TABLE: Dict[str, str] = {
     "conditions.csv": "Condition",
     "medications.csv": "Medication",
     "procedures.csv": "Procedure",
+    "claims.csv": "Claim",
+    "claims_transactions.csv": "ClaimLine",
 }
-
 BATCH_SIZE: int = 5000
 
 

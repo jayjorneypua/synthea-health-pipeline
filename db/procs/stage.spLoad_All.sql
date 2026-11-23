@@ -25,6 +25,8 @@ BEGIN
     EXEC stage.spMerge_Condition;
     EXEC stage.spMerge_Medication;
     EXEC stage.spMerge_Procedure;
+    EXEC stage.spMerge_Claim;
+    EXEC stage.spMerge_ClaimLine;
 
     DELETE FROM stage.Payer;
     DELETE FROM stage.Organization;
@@ -34,6 +36,8 @@ BEGIN
     DELETE FROM stage.Condition;
     DELETE FROM stage.Medication;
     DELETE FROM stage.[Procedure];
+    DELETE FROM stage.Claim;
+    DELETE FROM stage.ClaimLine;
 
     COMMIT TRANSACTION;
 
