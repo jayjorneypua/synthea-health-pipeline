@@ -106,6 +106,8 @@ models:
               arguments:
                 to: ref('fct_encounters')
                 field: encounter_id
+              config:
+                where: "is_encounter_deleted = false"
       - name: patient_version_key
         data_tests:
           - not_null
