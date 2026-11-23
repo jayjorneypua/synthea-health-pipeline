@@ -35,10 +35,10 @@ WITH claims AS (
 , line_totals AS (
     SELECT
         claim_id
-      , SUM(CASE WHEN transaction_type = 'CHARGE' THEN amount ELSE 0 END)       AS total_charges
-      , SUM(CASE WHEN transaction_type = 'PAYMENT' THEN amount ELSE 0 END)      AS total_payments
-      , SUM(CASE WHEN transaction_type = 'ADJUSTMENT' THEN amount ELSE 0 END)   AS total_adjustments
-      , COUNT(*)                                                                AS line_count
+      , SUM(CASE WHEN transaction_type = 'CHARGE' THEN line_amount ELSE 0 END)      AS total_charges
+      , SUM(CASE WHEN transaction_type = 'PAYMENT' THEN line_amount ELSE 0 END)     AS total_payments
+      , SUM(CASE WHEN transaction_type = 'TRANSFERIN' THEN line_amount ELSE 0 END)  AS total_transferred
+      , COUNT(*)                                                                    AS line_count
     FROM
         {{ ref('fct_claim_lines') }}
     GROUP BY
@@ -63,7 +63,7 @@ SELECT
   , claims.PrimaryOutstanding + claims.SecondaryOutstanding + claims.PatientOutstanding  AS total_outstanding
   , COALESCE(line_totals.total_charges, 0)                              AS total_charges
   , COALESCE(line_totals.total_payments, 0)                             AS total_payments
-  , COALESCE(line_totals.total_adjustments, 0)                          AS total_adjustments
+  , COALESCE(line_totals.total_transferred, 0)                          AS total_transferred
   , COALESCE(line_totals.line_count, 0)                                 AS line_count
 FROM
     claims

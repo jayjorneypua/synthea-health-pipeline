@@ -1,6 +1,8 @@
--- one row per claim transaction: CHARGE, PAYMENT, ADJUSTMENT, TRANSFERIN, TRANSFEROUT.
--- charge_id groups a charge with the payments and adjustments applied to it.-- one row per claim transaction: CHARGE, PAYMENT, ADJUSTMENT, TRANSFERIN, TRANSFEROUT.
--- charge_id groups a charge with the payments and adjustments applied to it.
+-- one row per claim transaction: CHARGE, PAYMENT, TRANSFERIN, TRANSFEROUT.
+-- charge_id groups a charge with the payments and transfers applied to it.
+-- Synthea puts the value in a different column per type, so line_amount picks the right one:
+-- CHARGE -> Amount, PAYMENT -> Payments, TRANSFERIN / TRANSFEROUT -> Transfers.
+-- outstanding is the running balance after the transaction, not an amount to sum.
 WITH claim_lines AS (
     SELECT
         *
@@ -25,10 +27,13 @@ SELECT
   , claim_lines.ToDate                                                  AS to_at
   , claim_lines.Units                                                   AS units
   , claim_lines.UnitAmount                                              AS unit_amount
-  , claim_lines.Amount                                                  AS amount
-  , claim_lines.Payments                                                AS payments
-  , claim_lines.Adjustments                                             AS adjustments
-  , claim_lines.Transfers                                               AS transfers
-  , claim_lines.Outstanding                                             AS outstanding
+  , CASE claim_lines.TransactionType
+        WHEN 'CHARGE' THEN claim_lines.Amount
+        WHEN 'PAYMENT' THEN claim_lines.Payments
+        WHEN 'TRANSFERIN' THEN claim_lines.Transfers
+        WHEN 'TRANSFEROUT' THEN claim_lines.Transfers
+        ELSE 0
+    END                                                                 AS line_amount
+  , claim_lines.Outstanding                                             AS outstanding_after
 FROM
     claim_lines
