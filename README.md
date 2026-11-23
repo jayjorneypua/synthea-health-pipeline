@@ -62,6 +62,7 @@ The Databricks part is a bundle-deployed job:
 - dbt: gold star schema and data tests
 - Airflow 3: single container, manual trigger
 - Power BI: dashboard on the gold marts
+- GitHub Actions: CI/CD (validate on every PR, deploy on merge to main)
 
 ## SQL Server design
 
@@ -112,6 +113,7 @@ The Databricks host, CLI profile and SQL warehouse ID are hardcoded for my works
 - `airflow/docker-compose.yml`
 - `tools/dbsql.ps1`
 - `tools/setup_databricks.ps1`
+- `.github/workflows/ci.yml`
 
 ### One-time setup
 
@@ -137,6 +139,8 @@ The Databricks host, CLI profile and SQL warehouse ID are hardcoded for my works
 databricks bundle deploy --profile <your-profile>
 ```
 
+For CI/CD, add `DATABRICKS_HOST` and `DATABRICKS_TOKEN` under the repo's Settings, Secrets and variables, Actions.
+
 ### Run
 
 ```powershell
@@ -155,6 +159,15 @@ Drops and rebuilds the SQL Server database (including CDC and the watermark), wi
 
 Synthea runs with a fixed seed and reference date (`-s 42 -r 20261122 -p 1000`), so every reset produces the same data.
 
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`):
+
+- On every pull request to main: `databricks bundle validate` and `dbt parse`, so broken bundle YAML, bad dbt refs or Jinja errors fail before merge.
+- On merge to main: the same checks, then `databricks bundle deploy`.
+
+It authenticates with a dedicated Databricks token stored as GitHub secrets (`DATABRICKS_HOST`, `DATABRICKS_TOKEN`), separate from the token Airflow uses, so either one can be revoked without breaking the other.
+
 ## Production note
 
 Here the extractor runs on a laptop through Airflow. In a real deployment it would run on an always-on server close to the database (the self-hosted gateway pattern), so CDC is read on time and nothing depends on a personal machine being on.
@@ -162,9 +175,11 @@ Here the extractor runs on a laptop through Airflow. In a real deployment it wou
 ## Repo layout
 
 ```
+.github/        CI/CD workflow
 airflow/        Dockerfile, compose file, DAG
 db/             SQL Server objects: tables, procs, views, security, CDC
 dbt/            gold models and tests
+docs/           README screenshots
 extractor/      CDC extractor
 loader/         Synthea CSV loader
 notebooks/      bronze and silver notebooks
@@ -172,4 +187,7 @@ orchestration/  helpers to run procs and the Databricks job
 powerbi/        dashboard
 resources/      Databricks bundle resources (job, schemas, volume)
 tools/          deploy and setup scripts
+start.ps1       start Agent, Docker, Airflow
+stop.ps1        stop Airflow
+reset.ps1       full reset and fresh DAG run
 ```
