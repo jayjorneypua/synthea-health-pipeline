@@ -1,22 +1,26 @@
-# landing holds the cdc volume (Parquet from the extractor). bronze/silver/gold hold the tables.
+# landing holds the raw files (CDC Parquet, FHIR JSON). bronze/silver/gold/omop hold the tables.
 resources:
   schemas:
     landing:
       catalog_name: synthea
       name: landing
-      comment: Raw Parquet files from the CDC extractor
+      comment: Raw files from the CDC extractor and the FHIR upload
     bronze:
       catalog_name: synthea
       name: bronze
-      comment: Auto Loader tables, one per capture instance
+      comment: Auto Loader tables, one per capture instance plus raw FHIR bundles
     silver:
       catalog_name: synthea
       name: silver
-      comment: CDC applied, deduped, SCD2 patients
+      comment: CDC applied, deduped, SCD2 patients; flattened and de-identified FHIR
     gold:
       catalog_name: synthea
       name: gold
-      comment: dbt marts for Power BI
+      comment: dbt marts and FHIR metrics for Power BI
+    omop:
+      catalog_name: synthea
+      name: omop
+      comment: OMOP CDM v5.4 tables built from the FHIR source
 
   volumes:
     cdc:
@@ -25,3 +29,9 @@ resources:
       name: cdc
       volume_type: MANAGED
       comment: CDC Parquet files, one folder per capture instance
+    fhir:
+      catalog_name: synthea
+      schema_name: ${resources.schemas.landing.name}
+      name: fhir
+      volume_type: MANAGED
+      comment: Synthea FHIR R4 bundles, one JSON file per patient

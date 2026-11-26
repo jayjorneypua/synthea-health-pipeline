@@ -6,7 +6,7 @@
 & (Join-Path $Root "stop.ps1")
 & (Join-Path $Root "tools\deploy_db.ps1") -Reset
 & (Join-Path $Root "tools\reset_databricks.ps1")
-& (Join-Path $Root "start.ps1")
+& (Join-Path $Root "start.ps1") -NoBrowser
 
 docker compose -f $Compose exec -T airflow airflow dags unpause synthea_health_pipeline
 docker compose -f $Compose exec -T airflow airflow dags trigger synthea_health_pipeline

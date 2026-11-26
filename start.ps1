@@ -1,5 +1,6 @@
 # starts everything the pipeline needs: env vars, SQL Server Agent (CDC capture), Docker, Airflow.
 # run with F5 in VS Code or .\start.ps1. Airflow UI: http://localhost:8081
+param([switch]$NoBrowser)
 [string]$Root = $PSScriptRoot
 [string]$Compose = Join-Path $Root "airflow\docker-compose.yml"
 
@@ -51,4 +52,4 @@ for ([int]$I = 0; $I -lt 36; $I++) {
 if ($Ready -eq $false) { throw "Airflow UI did not come up within 180s, check: docker compose -f airflow\docker-compose.yml logs" }
 
 Write-Host "Airflow ready: http://localhost:8081" -ForegroundColor Green
-Start-Process "http://localhost:8081"
+if ($NoBrowser -eq $false) { Start-Process "http://localhost:8081" }

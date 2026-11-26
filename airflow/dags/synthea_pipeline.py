@@ -1,5 +1,9 @@
 """synthea_health_pipeline: generate -> load stage -> merge -> simulate -> extract -> Databricks job -> cleanup.
 
+FHIR path in the same run: generate also writes FHIR bundles, upload_fhir sends them to the
+fhir volume (deleting each local file after a verified upload), and the Databricks job runs the
+FHIR notebooks next to the CDC ones.
+
 Manual trigger only (schedule=None). Every step is a script that also runs on its own outside Airflow.
 Cleanup only runs after the Databricks job succeeded, so local CSVs are kept for a rerun if anything fails.
 """
@@ -19,13 +23,22 @@ with DAG(
     max_active_runs=1,
     tags=["synthea"],
 ) as dag:
+    # FHIR: only the resource types the pipeline uses, UUID file names so patient names never leave this machine
     generate = BashOperator(
         task_id="generate_synthea",
         bash_command=(
-            "cd " + PROJECT + " && rm -rf data/synthea/csv && "
+            "cd " + PROJECT + " && rm -rf data/synthea/csv data/synthea/fhir && "
             "java -jar synthea/synthea-with-dependencies.jar -s 42 -r 20261122 -p 1000 "
-            "--exporter.baseDirectory ./data/synthea/ --exporter.csv.export true --exporter.fhir.export false"
+            "--exporter.baseDirectory ./data/synthea/ --exporter.csv.export true "
+            "--exporter.fhir.export true --exporter.fhir.included_resources Patient,Encounter,Condition,Observation "
+            "--exporter.hospital.fhir.export false --exporter.practitioner.fhir.export false "
+            "--exporter.use_uuid_filenames true"
         ),
+    )
+
+    upload_fhir = BashOperator(
+        task_id="upload_fhir",
+        bash_command="cd " + PROJECT + " && " + PYTHON + " extractor/upload_fhir.py",
     )
 
     load_stage = BashOperator(
@@ -56,7 +69,9 @@ with DAG(
 
     cleanup = BashOperator(
         task_id="cleanup_local_files",
-        bash_command="cd " + PROJECT + " && rm -rf data/synthea/csv data/extract",
+        bash_command="cd " + PROJECT + " && rm -rf data/synthea/csv data/synthea/fhir data/extract",
     )
 
-    generate >> load_stage >> merge >> simulate >> extract >> databricks_job >> cleanup
+    generate >> [load_stage, upload_fhir]
+    load_stage >> merge >> simulate >> extract
+    [extract, upload_fhir] >> databricks_job >> cleanup
