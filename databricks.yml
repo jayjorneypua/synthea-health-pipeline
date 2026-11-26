@@ -18,6 +18,9 @@ sync:
     - tests/**
     - data/**
     - synthea/**
+    - powerbi/**
+    - docs/**
+    - airflow/**
 
 targets:
   prod:
