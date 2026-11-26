@@ -1,10 +1,13 @@
-"""Uploads the Synthea FHIR bundles to a Databricks volume.
+"""Uploads the Synthea FHIR bundles to a Databricks volume, gzipped.
 
-Each JSON file in data/synthea/fhir goes to /Volumes/synthea/landing/fhir/bundles/, its size is
-verified, and only then the local file is deleted, so the bundles never pile up on disk.
-Bronze (04_bronze_fhir) picks them up with Auto Loader.
+Each JSON file in data/synthea/fhir is gzipped in memory (JSON shrinks about 10x), uploaded to
+/Volumes/synthea/landing/fhir/bundles/ as <name>.json.gz, its size is verified, and only then the
+local file is deleted, so the bundles never pile up on disk.
+Bronze (04_bronze_fhir) picks them up with Auto Loader; Spark reads .gz files directly.
 """
 import argparse
+import gzip
+import io
 import os
 import sys
 import time
@@ -19,15 +22,15 @@ LOCAL_ROOT: Path = Path(__file__).resolve().parent.parent / "data" / "synthea" /
 UPLOAD_THREADS: int = 8
 
 
-def upload_and_delete(client: WorkspaceClient, local_path: Path) -> None:
-    remote_path: str = VOLUME_ROOT + "/" + local_path.name
-    with open(local_path, "rb") as handle:
-        client.files.upload(remote_path, handle, overwrite=True)
+def upload_and_delete(client: WorkspaceClient, local_path: Path) -> int:
+    remote_path: str = VOLUME_ROOT + "/" + local_path.name + ".gz"
+    compressed: bytes = gzip.compress(local_path.read_bytes())
+    client.files.upload(remote_path, io.BytesIO(compressed), overwrite=True)
     remote_size: Optional[int] = client.files.get_metadata(remote_path).content_length
-    local_size: int = local_path.stat().st_size
-    if remote_size != local_size:
-        raise RuntimeError("Size mismatch for " + remote_path + ": local " + str(local_size) + ", remote " + str(remote_size))
+    if remote_size != len(compressed):
+        raise RuntimeError("Size mismatch for " + remote_path + ": sent " + str(len(compressed)) + ", remote " + str(remote_size))
     local_path.unlink()
+    return len(compressed)
 
 
 def main() -> int:
@@ -50,12 +53,16 @@ def main() -> int:
         print("no FHIR files in " + str(LOCAL_ROOT))
         return 1
 
+    raw_bytes: int = sum(bundle_file.stat().st_size for bundle_file in bundle_files)
     started: float = time.perf_counter()
     with ThreadPoolExecutor(max_workers=UPLOAD_THREADS) as pool:
-        list(pool.map(lambda local_path: upload_and_delete(client, local_path), bundle_files))
+        sent_sizes: List[int] = list(pool.map(lambda local_path: upload_and_delete(client, local_path), bundle_files))
 
     seconds: float = time.perf_counter() - started
-    print("uploaded " + str(len(bundle_files)) + " FHIR bundles in " + str(round(seconds, 1)) + "s")
+    print(
+        "uploaded " + str(len(bundle_files)) + " FHIR bundles in " + str(round(seconds, 1)) + "s: "
+        + str(round(raw_bytes / 1048576)) + " MB raw, " + str(round(sum(sent_sizes) / 1048576)) + " MB sent"
+    )
     return 0
 
 

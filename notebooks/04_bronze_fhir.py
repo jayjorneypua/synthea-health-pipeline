@@ -1,6 +1,6 @@
 # Databricks notebook source
 # Bronze: raw FHIR bundles, one row per JSON file (one patient per file).
-# /Volumes/synthea/landing/fhir/bundles/*.json -> synthea.bronze.fhir_bundle
+# /Volumes/synthea/landing/fhir/bundles/*.json.gz -> synthea.bronze.fhir_bundle
 # Kept as raw text. Silver does the flattening.
 from pyspark.sql import functions as F
 
@@ -12,7 +12,7 @@ stream = (
         .format("cloudFiles")
         .option("cloudFiles.format", "text")
         .option("wholetext", "true")
-        .option("pathGlobFilter", "*.json")
+        .option("pathGlobFilter", "*.json.gz")
         .load(landing_path)
         .withColumnRenamed("value", "bundle_json")
         .withColumn("_source_file", F.col("_metadata.file_path"))
