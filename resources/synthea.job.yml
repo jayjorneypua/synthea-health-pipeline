@@ -3,7 +3,7 @@ resources:
     synthea_health_pipeline:
       name: synthea_health_pipeline
       max_concurrent_runs: 1
-      # no schedule: Airflow triggers it after the extractor uploads
+      # no schedule: Airflow triggers it after the extractor and FHIR upload finish
 
       email_notifications:
         on_failure:
@@ -46,3 +46,32 @@ resources:
             warehouse_id: 606b0c60dc21c8fd
             catalog: synthea
             schema: gold
+
+        # FHIR path: runs next to the CDC path
+        - task_key: bronze_fhir
+          notebook_task:
+            notebook_path: ../notebooks/04_bronze_fhir.py
+
+        - task_key: silver_fhir
+          depends_on:
+            - task_key: bronze_fhir
+          notebook_task:
+            notebook_path: ../notebooks/05_silver_fhir.py
+
+        - task_key: dq_fhir
+          depends_on:
+            - task_key: silver_fhir
+          notebook_task:
+            notebook_path: ../notebooks/06_dq_fhir.py
+
+        - task_key: omop_fhir
+          depends_on:
+            - task_key: dq_fhir
+          notebook_task:
+            notebook_path: ../notebooks/07_omop_fhir.py
+
+        - task_key: metrics_fhir
+          depends_on:
+            - task_key: omop_fhir
+          notebook_task:
+            notebook_path: ../notebooks/08_metrics_fhir.py
